@@ -7,28 +7,27 @@ var App = React.createClass({
 		};
 	},
 
-	componentWillMount: function() {
-		this.firebaseRef = firebase.database().ref();
-		this.firebaseRef.on('value', function(dataSnapshot) {
+  componentWillMount: function() {
+    this.firebaseRef = firebase.database().ref('items');
+    this.firebaseRef.limitToLast(25).on('value', function(dataSnapshot) {
+      var items = [];
+      dataSnapshot.forEach(function(childSnapshot) {
+        var item = childSnapshot.val();
+        item['.key'] = childSnapshot.key;
+        items.push(item);
+      }.bind(this));
 
-		dataSnapshot.forEach(function(childSnapshot) {
-
-		var item = childSnapshot.val();
-			console.log(item);
-			
-			sthis.setState({
-
-			})
-		});
-
-		});
-	},
+      this.setState({
+        items: items
+      });
+    }.bind(this));
+  },
 
 	render: function() {
 		return (
 				<div>
 					<h1>FTF-A WebApp</h1>
-					<Posts data={thi} />
+					<Posts data={this.state.items} />
 				</div>
 			)
 	}
@@ -40,13 +39,13 @@ var Posts =  React.createClass({
 		var data = this.props.data;
 		var postTemplate = data.map(function(el, index) {
 				return 		(
-										<div className="col-md-4">
+										<div key={index} className="col-md-4">
 											<div className="card">
-												<img className="card-img-top" src="" alt="Card image cap" />
+												<img className="card-img-top" src={el.thumbnail} alt="Thumbnail" />
 												<div className="card-block">
-													<h4 className="card-title">Card title</h4>
-													<p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-													<a href="#" className="btn btn-primary">Go somewhere</a>
+													<h4 className="card-title">{el.title}</h4>
+													<p className="card-text">{el.description}</p>
+													<a href="#" className="btn btn-primary">More</a>
 												</div>
 											</div>
 										</div>
@@ -55,7 +54,7 @@ var Posts =  React.createClass({
 
 		return (
 				<div className="row">
-					{postTemplate}s
+					{postTemplate}
 				</div>
 			)
 	}
